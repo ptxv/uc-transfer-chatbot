@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import './App.css'
-import ChatPage from "./chatPage.tsx";
 import sendIcon from './assets/send-icon.png'
 import dgLogo from './assets/dg-logo.png'
 
@@ -110,15 +109,4 @@ function Home() {
   );
 }
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/chat" element={<ChatPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
+export default Home;
