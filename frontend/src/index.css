@@ -35,6 +35,8 @@
     --text: #9ca3af;
     --text-h: #f3f4f6;
     --bg: #16171d;
+    /* TODO: make this look good somehow */
+    /* --bg: radial-gradient(#0E0E0E 70%, #106070); */
     --border: #2e303a;
     --code-bg: #1f2028;
     --accent: #c084fc;
@@ -50,7 +52,7 @@
   }
 }
 
-#root {
+.main {
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
@@ -77,20 +79,24 @@ h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
   margin: 32px 0;
+
   @media (max-width: 1024px) {
     font-size: 36px;
     margin: 20px 0;
   }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
+
   @media (max-width: 1024px) {
     font-size: 20px;
   }
 }
+
 p {
   margin: 0;
 }
@@ -108,4 +114,24 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+}
+
+.accentFont {
+  color: #5BDDFF;
+}
+
+.textBox {
+  padding: 12px;
+  width: 300px;
+  border-radius: 30px;
+  border: 1px solid #5BDDFF;
+  margin-right: 8px;
+}
+
+.button {
+  padding: 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: 1px solid #5BDDFF;
+  background-color: #5BDDFF;
 }

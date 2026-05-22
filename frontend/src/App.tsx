@@ -2,6 +2,8 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import './App.css'
 import ChatPage from "./chatPage.tsx";
+import sendIcon from './assets/send-icon.png'
+import dgLogo from './assets/dg-logo.png'
 
 function Home() {
   const [message, setMessage] = useState("");
@@ -26,72 +28,84 @@ function Home() {
 
   return (
     <>
-      <section id="center">
-        <div className="hero"></div>
-        <div>
-          <h1>Transfer to your dream UC</h1>
-          <p>with an AI advisor in your corner.</p>
-          <p>Ask any question about GPA requirements, ASSIST.org, deadlines, and more</p>
-        </div>
-        <button
-          onClick={() => navigate("/chat")}
-          style={{
-            padding: "12px 28px",
-            borderRadius: "999px",
-            background: "#22d4c8",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: 600,
-            fontSize: "16px",
-            color: "#000",
-            marginTop: "1rem",
-          }}
-        >
-          Get Started →
-        </button>
-      </section>
-      <section id="next-steps">
-        <div style={{ marginTop: "2rem" }}>
-          <input
-            type="text"
-            placeholder="Ask something..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            style={{ padding: "12px", width: "300px", borderRadius: "8px", border: "1px solid #ccc", marginRight: "8px" }}
-          />
-          <button onClick={sendMessage} style={{ padding: "12px 18px", borderRadius: "8px", cursor: "pointer" }}>
-            Send
+      <img src={dgLogo} style={{ height: "94px", padding: "10px" }} alt="DG Logo" />
+      <div className="main">
+        <section id="center">
+          <div>
+            <h1>Transfer to your</h1>
+            <h1 className="accentFont">dream UC</h1>
+            <p className="accentFont" style={{ opacity: "0.6" }}>
+              with an AI advisor in your corner.
+            </p>
+            <p className="accentFont">Ask any question about GPA requirements, ASSIST.org, deadlines, and more</p>
+          </div>
+          <button
+            onClick={() => navigate("/chat")}
+            style={{
+              padding: "12px 28px",
+              borderRadius: "999px",
+              background: "#5BDDFF",
+              border: "none",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "16px",
+              color: "#000",
+              marginTop: "1rem",
+            }}
+          >
+            Get Started →
           </button>
-          {reply && (
-            <div style={{ marginTop: "1rem" }}>
-              <strong>Backend reply:</strong>
-              <p>{reply}</p>
-            </div>
-          )}
-        </div>
-        <div id="social">
-          <ul>
-            <li>
-              <a href="https://github.com/developersguildclub/uc-transfer-chatbot" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://discord.gg/nqbudRdstm" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+        </section>
+        <section id="next-steps">
+          <div style={{ marginTop: "2rem" }}>
+            <input
+              className="textBox"
+              type="text"
+              placeholder="Ask something..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
+
+            {/* TODO: fix button alignment with text box */}
+            <button
+              className="button"
+              onClick={sendMessage}
+            >
+              <img src={sendIcon} style={{ height: "20px" }} alt="Send" />
+            </button>
+
+            {reply && (
+              <div style={{ marginTop: "1rem" }}>
+                <strong>Backend reply:</strong>
+                <p>{reply}</p>
+              </div>
+            )}
+          </div>
+          <div id="social">
+            <ul>
+              <li>
+                <a href="https://github.com/developersguildclub/uc-transfer-chatbot" target="_blank">
+                  <svg className="button-icon" role="presentation" aria-hidden="true">
+                    <use href="/icons.svg#github-icon"></use>
+                  </svg>
+                  GitHub
+                </a>
+              </li>
+              <li>
+                <a href="https://discord.gg/nqbudRdstm" target="_blank">
+                  <svg className="button-icon" role="presentation" aria-hidden="true">
+                    <use href="/icons.svg#discord-icon"></use>
+                  </svg>
+                  Discord
+                </a>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <div className="ticks"></div>
+        <section id="spacer"></section>
+      </div>
     </>
   );
 }
