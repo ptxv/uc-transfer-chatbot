@@ -2,9 +2,9 @@ import json
 import requests
 import time
 from database import get_connection, setup_database
-from assist_keys import ASSIST_AGREEMENTS
 
 ASSIST_API_URL = "https://prod.assistng.org/articulation/api/Agreements"
+
 
 def fetch_assist_agreement(key):
     response = requests.get(
@@ -23,8 +23,58 @@ def fetch_assist_agreement(key):
 
     return response.json()
 
-def save_assist_agreement(source_key, metadata, data):
+
+def parse_json_field(value):
+    """
+    ASSIST sometimes returns fields as JSON strings instead of dictionaries.
+    This safely converts them.
+    """
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except Exception:
+            return None
+
+    return value
+
+
+def extract_school_name(result, field_name):
+    school_raw = result.get(field_name)
+    school_data = parse_json_field(school_raw)
+
+    if not isinstance(school_data, dict):
+        return "Unknown school"
+
+    names = school_data.get("names", [])
+
+    if names and isinstance(names, list):
+        return names[0].get("name", "Unknown school")
+
+    return school_data.get("name", "Unknown school")
+
+
+def extract_academic_year(result):
+    academic_year_raw = result.get("academicYear")
+    academic_year_data = parse_json_field(academic_year_raw)
+
+    if isinstance(academic_year_data, dict):
+        return (
+            academic_year_data.get("code")
+            or academic_year_data.get("displayName")
+            or academic_year_data.get("name")
+            or "Unknown year"
+        )
+
+    return "Unknown year"
+
+
+def save_assist_agreement(source_key, data):
     result = data.get("result", {})
+
+    from_school = extract_school_name(result, "sendingInstitution")
+    to_school = extract_school_name(result, "receivingInstitution")
+    major = result.get("name", "Unknown major")
+    academic_year = extract_academic_year(result)
 
     raw_json = json.dumps(data)
 
@@ -43,32 +93,62 @@ def save_assist_agreement(source_key, metadata, data):
         VALUES (?, ?, ?, ?, ?, ?)
     """, (
         source_key,
-        metadata.get("from_school", "Unknown"),
-        metadata.get("to_school", "Unknown"),
-        metadata.get("major", result.get("name", "Unknown major")),
-        "Unknown year",
+        from_school,
+        to_school,
+        major,
+        academic_year,
         raw_json
     ))
+
+    cursor.execute("""
+        UPDATE assist_agreement_keys
+        SET scraped = 1
+        WHERE agreement_key = ?
+    """, (source_key,))
 
     conn.commit()
     conn.close()
 
+
+def get_unscraped_keys(limit=50):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT agreement_key
+        FROM assist_agreement_keys
+        WHERE scraped = 0
+        LIMIT ?
+    """, (limit,))
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [row[0] for row in rows]
+
+
 def main():
     setup_database()
 
-    for agreement in ASSIST_AGREEMENTS:
-        key = agreement["key"]
+    keys = get_unscraped_keys(limit=50)
 
-        print("\n==============================")
-        print("Scraping:", agreement["from_school"], "→", agreement["to_school"], agreement["major"])
+    if not keys:
+        print("No unscraped keys found. Run discover_assist_keys.py first.")
+        return
 
+    print(f"Scraping {len(keys)} agreements...")
+
+    for key in keys:
         data = fetch_assist_agreement(key)
 
         if data:
-            save_assist_agreement(key, agreement, data)
-            print("Saved!")
+            save_assist_agreement(key, data)
+            print("Saved:", key)
 
         time.sleep(1)
+
+    print("Done scraping batch.")
+
 
 if __name__ == "__main__":
     main()

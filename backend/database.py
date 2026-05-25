@@ -30,26 +30,42 @@ def setup_database():
             raw_json TEXT
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS assist_agreement_keys (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            academic_year_id INTEGER,
+            sending_institution_id INTEGER,
+            receiving_institution_id INTEGER,
+            agreement_type TEXT,
+            agreement_label TEXT,
+            agreement_key TEXT UNIQUE,
+            scraped INTEGER DEFAULT 0
+            )
+        """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS articulation_courses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        agreement_id INTEGER,
-        uc_prefix TEXT,
-        uc_course_number TEXT,
-        uc_course_title TEXT,
-        cc_prefix TEXT,
-        cc_course_number TEXT,
-        cc_course_title TEXT,
-        group_position INTEGER,
-        course_position INTEGER,
-        group_conjunction TEXT,
-        course_conjunction TEXT,
-        requirement_instruction TEXT,
-        notes TEXT,
-        FOREIGN KEY (agreement_id) REFERENCES assist_agreements(id)
-    )
-""")
+        CREATE TABLE IF NOT EXISTS articulation_courses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agreement_id INTEGER,
+            uc_prefix TEXT,
+            uc_course_number TEXT,
+            uc_course_title TEXT,
+            cc_prefix TEXT,
+            cc_course_number TEXT,
+            cc_course_title TEXT,
+            group_position INTEGER,
+            course_position INTEGER,
+            group_conjunction TEXT,
+            course_conjunction TEXT,
+            requirement_instruction TEXT,
+            requirement_category TEXT,
+            section_title TEXT,
+            notes TEXT,
+            receiving_type TEXT,
+            receiving_courses_text TEXT,
+            FOREIGN KEY (agreement_id) REFERENCES assist_agreements(id)
+        )
+        """)
 
     cursor.execute("""
         INSERT INTO transfer_info (question_keyword, answer)
