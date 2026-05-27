@@ -35,14 +35,13 @@ export default function ChatPage() {
     if (!trimmed) return;
     setMessages((prev) => [...prev, { role: "user", text: trimmed }]);
     setInput("");
-    // TODO: connect backend
-    // const res = await fetch("http://127.0.0.1:5000/chat", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ message: trimmed }),
-    // });
-    // const data = await res.json();
-    // setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
+    const res = await fetch("http://127.0.0.1:5000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: trimmed }),
+    });
+    const data = await res.json();
+    setMessages((prev) => [...prev, { role: "bot", text: data.reply }]);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
