@@ -43,7 +43,7 @@ function Home() {
             style={{
               padding: "12px 28px",
               borderRadius: "999px",
-              background: "#5BDDFF",
+              background: "var(--accent)",
               border: "none",
               cursor: "pointer",
               fontWeight: 600,
