@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import "./chatPage.css";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   role: "bot" | "user";
@@ -7,6 +8,7 @@ interface Message {
 }
 
 export default function ChatPage() {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
@@ -51,7 +53,7 @@ export default function ChatPage() {
   return (
     <div className="cp-page">
       <div className="cp-topbar">
-        <img src="/favicon.png" className="cp-logo" alt="logo" />
+        <img src="/favicon.png" className="cp-logo" alt="logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }} />
         <button className="cp-reset-btn" onClick={handleReset}>Reset</button>
       </div>
 
