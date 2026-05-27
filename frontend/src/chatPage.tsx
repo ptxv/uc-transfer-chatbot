@@ -51,7 +51,7 @@ export default function ChatPage() {
   return (
     <div className="cp-page">
       <div className="cp-topbar">
-        <img src="/favicon.svg" className="cp-logo" alt="logo" />
+        <img src="/favicon.png" className="cp-logo" alt="logo" />
         <button className="cp-reset-btn" onClick={handleReset}>Reset</button>
       </div>
 
