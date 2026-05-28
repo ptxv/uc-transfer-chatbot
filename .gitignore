@@ -27,3 +27,6 @@ dist-ssr
 *.pyc
 *.pyo
 *.pyd
+
+.venv
+.vite
