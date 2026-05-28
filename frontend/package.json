@@ -1,7 +1,7 @@
 {
 	"name": "uc-transfer-chatbot",
 	"private": true,
-	"version": "2026.02.28.0",
+	"version": "2026.02.28.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",

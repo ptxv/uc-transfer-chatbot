@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 interface Message {
 	role: 'bot' | 'user';
@@ -7,7 +6,6 @@ interface Message {
 }
 
 export default function ChatPage() {
-	const navigate = useNavigate();
 	const [messages, setMessages] = useState<Message[]>([
 		{
 			role: 'bot',
@@ -36,7 +34,7 @@ export default function ChatPage() {
 		if (!trimmed) return;
 		setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
 		setInput('');
-		const res = await fetch('http://127.0.0.1:5000/chat', {
+		const res = await fetch('/api/chat', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ message: trimmed })
