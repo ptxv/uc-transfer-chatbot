@@ -1,6 +1,7 @@
 # UC Transfer Chatbot
 
 This project has:
+
 - `backend/` (Flask API)
 - `frontend/` (React + Vite app)
 
@@ -49,7 +50,7 @@ Backend runs at: `http://localhost:5000`
 From `frontend/`:
 
 ```bash
-pnpm dev
+pnpm dev --open
 ```
 
 Frontend runs at: `http://localhost:5173`
@@ -67,5 +68,5 @@ Terminal 2 (frontend):
 
 ```bash
 cd frontend
-pnpm dev
+pnpm dev --open
 ```
