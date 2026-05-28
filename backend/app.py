@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Blueprint
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from model import get_ai_response
 from database import setup_database
@@ -7,15 +7,13 @@ from query_courses import search_articulations
 app = Flask(__name__)
 CORS(app)
 
-api = Blueprint("api", __name__)
-
 setup_database()
 
-@api.route("/")
+@app.route("/")
 def index():
     return "Backend is running!"
 
-@api.route("/search", methods=["GET"])
+@app.route("/search", methods=["GET"])
 def search():
     try:
         to_school = request.args.get("to_school")
@@ -87,7 +85,7 @@ def search():
             "error": str(e)
         }), 500
 
-@api.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     user_message = data.get("message", "")
@@ -99,6 +97,4 @@ def chat():
     })
 
 if __name__ == "__main__":
-    app.register_blueprint(api, url_prefix="/api")
     app.run(debug=True, port=5000)
-    
