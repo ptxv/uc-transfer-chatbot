@@ -85,24 +85,13 @@ def search():
             "error": str(e)
         }), 500
 
-
-# JUST FOR TESTING
-@app.route("/ai/<thing>")
-def ai(thing):
-    return jsonify({
-        "response": get_ai_response(thing),
-    })
-
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     user_message = data.get("message", "")
-
     ai_reply = get_ai_response(user_message)
 
-    return jsonify({
-        "reply": ai_reply
-    })
+    return {"reply": ai_reply}
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

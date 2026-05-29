@@ -20,9 +20,12 @@ agent = create_agent(
 
 def get_ai_response(user_message: str):
     result = agent.invoke(
-        {"messages": [{"role": "user", "content": user_message}]}
+        {"messages": [
+            {"role": "user", "content": user_message}
+        ]}
     )
-    return result["messages"][-1].content_blocks
+
+    return result["messages"][-1].content_blocks[0]["text"]
 
     """
     # for now
