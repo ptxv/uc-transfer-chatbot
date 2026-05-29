@@ -48,7 +48,7 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-screen flex-col">
+		<div className="flex h-dvh flex-col">
 			<header className="flex flex-row items-center justify-between border-b p-4">
 				<a href="/">
 					<img src="/favicon.png" className="h-14" alt="Logo of Developer's Guild" />
