@@ -7,6 +7,7 @@ interface Message {
 
 export default function ChatPage() {
 	const [messages, setMessages] = useState<Message[]>([
+		// TODO Chat Bot Name
 		{
 			role: 'bot',
 			text: "Hey! I'm (idk what name yet) 👋 I can help you navigate UC transfer requirements. What would you like to know?"
@@ -20,6 +21,7 @@ export default function ChatPage() {
 	}, [messages]);
 
 	function handleReset() {
+		// TODO Chat Bot Name
 		setMessages([
 			{
 				role: 'bot',
@@ -48,10 +50,10 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-dvh flex-col">
-			<header className="flex flex-row items-center justify-between border-b p-4">
+		<div className="flex h-dvh flex-col bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)]">
+			<header className="flex flex-row items-center justify-between border-b pr-4">
 				<a href="/">
-					<img src="/favicon.png" className="h-14" alt="Logo of Developer's Guild" />
+					<img src="/favicon.png" className="h-20 p-2" alt="Logo of Developer's Guild" />
 				</a>
 				<button className="btn rounded-3xl btn-xl btn-primary" onClick={handleReset}>
 					Reset

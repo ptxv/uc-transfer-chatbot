@@ -5,21 +5,21 @@ export default function Home() {
 
 	return (
 		<>
-			<div className="flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)] pb-8">
+			<div className="flex flex-col items-center justify-center gap-4 bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)] pb-8">
 				<img
 					src="/favicon.png"
-					className="absolute top-0 left-0 h-24 p-2"
+					className="h-20 p-2 self-start"
 					alt="Logo of Developer's Guild"
 				/>
 				{/* * HERO */}
-				<section className="flex min-h-[80svh] flex-col items-center justify-center gap-10 text-center text-3xl">
+				<section className="flex flex-col items-center justify-center gap-4 text-center text-3xl">
 					<div>
-						<h1 className="font-syne text-6xl leading-tight font-bold">
+						<h1 className="font-syne text-6xl font-bold">
 							Transfer to your
 							<br />
 							<span className="font-semibold text-primary">dream UC</span>
 						</h1>
-						<p className="leading-loose font-bold text-primary opacity-60">
+						<p className="font-bold text-primary opacity-60">
 							with an AI advisor in your corner.
 						</p>
 					</div>
@@ -36,9 +36,10 @@ export default function Home() {
 				</section>
 
 				{/* * Fake chat demo */}
-				<section className="flex w-4/5 flex-col gap-4 rounded-4xl border p-4 font-roboto text-2xl">
+				<section className="flex w-11/12 flex-col gap-4 rounded-4xl border p-4 font-roboto text-2xl">
 					<div className="chat-start chat">
 						<div className="chat-bubble bg-primary/50">
+						{/* TODO Chat Bot Name */}
 							Hey! I'm (idk what name yet) 👋 I can help you navigate UC transfer requirements. What
 							would you like to know?
 						</div>
@@ -67,11 +68,11 @@ export default function Home() {
 						</button>
 					</div>
 				</section>
-				<section className="flex w-full justify-center bg-primary/25 p-8 font-syne text-3xl font-medium">
-					<div className="flex w-4/5 flex-col gap-4">
+				<section className="flex w-full justify-center bg-primary/25 p-4 font-syne text-3xl font-medium">
+					<div className="flex w-11/12 flex-col gap-4">
 						<div className="text-primary">What we offer</div>
 						<div>Everything you need to plan your transfer</div>
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 							{[
 								'GPA Requirements',
 								'Deadlines & Timeline',
@@ -87,7 +88,7 @@ export default function Home() {
 						</div>
 					</div>
 				</section>
-				<section className="flex flex-col gap-4 font-syne">
+				<section className="flex flex-col gap-4 font-syne p-4">
 					<div className="text-5xl font-bold text-primary">Three steps to clarity</div>
 					<div className="text-3xl font-medium text-primary">
 						No appointments. No waiting room. Just answers, instantly.
