@@ -85,6 +85,14 @@ def search():
             "error": str(e)
         }), 500
 
+
+# JUST FOR TESTING
+@app.route("/ai/<thing>")
+def ai(thing):
+    return jsonify({
+        "response": get_ai_response(thing),
+    })
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()

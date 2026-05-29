@@ -30,3 +30,7 @@ dist-ssr
 
 .venv
 .vite
+
+.env
+.env.*
+!.env.example

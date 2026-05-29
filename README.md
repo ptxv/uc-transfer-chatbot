@@ -26,7 +26,33 @@ cd backend
 pip install -r requirements.txt
 ```
 
-## 2) Install Frontend Requirements
+## 2) Configure the `.env` File
+
+The backend needs an AI API key to work. From `backend/`, copy the example file to create your own `.env`:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Then open `.env` and add your API key.
+
+We'll use [LLM7.io](https://llm7.io/) for the AI API key (it has a great free tier). To get a key:
+
+1. Go to [https://llm7.io/](https://llm7.io/) and create an account.
+2. On the dashboard, scroll down to **Manage API keys** and click **Add API key**.
+3. Copy the generated key and paste it into your `.env` file as the value of `AI_API_KEY`.
+
+Make sure `USE_LLM7=true` is set when using an LLM7.io key:
+
+```bash
+AI_API_KEY="your-key-here"
+USE_LLM7=true
+```
+
+> Alternatively, you can use a default OpenAI API key. In that case, set `USE_LLM7=false` and use your OpenAI key as `AI_API_KEY`.
+
+## 3) Install Frontend Requirements
 
 In a second terminal (or after finishing backend setup):
 
@@ -35,7 +61,7 @@ cd frontend
 pnpm i
 ```
 
-## 3) Run the Backend
+## 4) Run the Backend
 
 From `backend/`:
 
@@ -45,7 +71,7 @@ python app.py
 
 Backend runs at: `http://localhost:5000`
 
-## 4) Run the Frontend
+## 5) Run the Frontend
 
 From `frontend/`:
 
