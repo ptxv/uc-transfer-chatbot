@@ -77,3 +77,59 @@ def search_articulations(to_school=None, major=None, receiving=None, cc_course=N
     conn.close()
 
     return rows
+
+def get_valid_schools():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT to_school
+        FROM assist_agreements WHERE to_school IS NOT NULL 
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return [row[0] for row in rows]
+
+def get_valid_major():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT major
+        FROM assist_agreements WHERE major IS NOT NULL
+    """)
+
+    rows = cursor.fetchall()
+
+    conn.close()
+
+    return [row[0] for row in rows]
+
+def get_valid_receiving_courses():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT
+        uc_prefix || ' ' || uc_course_number
+        FROM articulation_courses
+        WHERE uc_prefix IS NOT NULL
+        AND uc_course_number IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
+
+def get_valid_cc_courses():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DISTINCT
+        cc_prefix || ' ' || cc_course_number
+        FROM articulation_courses
+        WHERE cc_prefix IS NOT NULL
+        AND cc_course_number IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return [row[0] for row in rows]

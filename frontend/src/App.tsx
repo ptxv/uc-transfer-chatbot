@@ -101,6 +101,9 @@ export default function Home() {
 						)
 					)}
 				</section>
+				<section className="flex w-full justify-center bg-primary/25 p-5 font-syne font-medium">
+					<div className="text-xl">Made with ♡ by the Developers' Guild in De Anza College.</div>
+				</section>
 			</div>
 		</>
 	);
