@@ -5,7 +5,7 @@ export default function Home() {
 
 	return (
 		<>
-			<div className="flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)] pb-8">
+			<div className="flex flex-col items-center justify-center gap-8 bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)]">
 				<img
 					src="/favicon.png"
 					className="absolute top-0 left-0 h-24 p-2"
@@ -99,6 +99,9 @@ export default function Home() {
 							</div>
 						)
 					)}
+				</section>
+				<section className="flex w-full justify-center bg-primary/25 p-5 font-syne font-medium">
+					<div className="text-xl">Made with ♡ by the Developers' Guild in De Anza College.</div>
 				</section>
 			</div>
 		</>
