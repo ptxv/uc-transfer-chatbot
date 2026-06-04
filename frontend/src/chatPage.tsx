@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
 	role: 'bot' | 'user';
@@ -66,7 +67,9 @@ export default function ChatPage() {
 					{messages.map((msg, i) =>
 						msg.role === 'bot' ? (
 							<div key={i} className="chat-start chat">
-								<div className="chat-bubble bg-primary/50">{msg.text}</div>
+								<div className="chat-bubble bg-primary/50">
+									<ReactMarkdown>{msg.text}</ReactMarkdown>
+								</div>
 							</div>
 						) : (
 							<div key={i} className="chat-end chat">
