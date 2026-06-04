@@ -1,51 +1,100 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
 	role: 'bot' | 'user';
 	text: string;
 }
 
+const CHAT_MESSAGES_STORAGE_KEY = 'uc-transfer-chatbot:messages';
+
+// TODO Chat Bot Name
+const INITIAL_MESSAGES: Message[] = [
+	{
+		role: 'bot',
+		text: "Hey! I'm (idk what name yet) 👋 I can help you navigate UC transfer requirements. What would you like to know?"
+	}
+];
+
+function isMessage(value: unknown): value is Message {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'role' in value &&
+		'text' in value &&
+		(value.role === 'bot' || value.role === 'user') &&
+		typeof value.text === 'string'
+	);
+}
+
+function loadStoredMessages() {
+	try {
+		const storedMessages = localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
+		if (!storedMessages) return INITIAL_MESSAGES;
+
+		const parsedMessages: unknown = JSON.parse(storedMessages);
+		return Array.isArray(parsedMessages) && parsedMessages.every(isMessage)
+			? parsedMessages
+			: INITIAL_MESSAGES;
+	} catch {
+		return INITIAL_MESSAGES;
+	}
+}
+
 export default function ChatPage() {
-	const [messages, setMessages] = useState<Message[]>([
-		// TODO Chat Bot Name
-		{
-			role: 'bot',
-			text: "Hey! I'm (idk what name yet) 👋 I can help you navigate UC transfer requirements. What would you like to know?"
-		}
-	]);
+	const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
 	const [input, setInput] = useState('');
+	const [isSending, setIsSending] = useState(false);
 	const bottomRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages]);
 
+	useEffect(() => {
+		localStorage.setItem(CHAT_MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+	}, [messages]);
+
 	function handleReset() {
-		// TODO Chat Bot Name
-		setMessages([
-			{
-				role: 'bot',
-				text: "Hey! I'm (idk what name yet) 👋 I can help you navigate UC transfer requirements. What would you like to know?"
-			}
-		]);
+		setMessages(INITIAL_MESSAGES);
 		setInput('');
+		setIsSending(false);
+		localStorage.removeItem(CHAT_MESSAGES_STORAGE_KEY);
 	}
 
 	async function handleSend() {
 		const trimmed = input.trim();
-		if (!trimmed) return;
+		if (!trimmed || isSending) return;
 
 		setMessages((prev) => [...prev, { role: 'user', text: trimmed }]);
 		setInput('');
+		setIsSending(true);
 
-		const res = await fetch('/api/chat', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message: trimmed })
-		});
+		try {
+			const res = await fetch('/api/chat', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ message: trimmed })
+			});
 
-		const data = await res.json();
-		setMessages((prev) => [...prev, { role: 'bot', text: data.reply }]);
+			if (!res.ok) {
+				throw new Error('Chat request failed');
+			}
+
+			const data = await res.json();
+			if (typeof data.reply !== 'string') {
+				throw new Error('Chat response was invalid');
+			}
+
+			setMessages((prev) => [...prev, { role: 'bot', text: data.reply }]);
+		} catch {
+			setMessages((prev) => [
+				...prev,
+				{ role: 'bot', text: "Sorry, I couldn't get a response. Please try again." }
+			]);
+		} finally {
+			setIsSending(false);
+		}
 	}
 
 	function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -68,13 +117,25 @@ export default function ChatPage() {
 					{messages.map((msg, i) =>
 						msg.role === 'bot' ? (
 							<div key={i} className="chat-start chat">
-								<div className="chat-bubble bg-primary/50">{msg.text}</div>
+								<div className="chat-bubble bg-primary/50">
+									<ReactMarkdown>{msg.text}</ReactMarkdown>
+								</div>
 							</div>
 						) : (
 							<div key={i} className="chat-end chat">
 								<div className="chat-bubble bg-primary text-primary-content">{msg.text}</div>
 							</div>
 						)
+					)}
+					{isSending && (
+						<div className="chat-start chat">
+							<div className="chat-bubble bg-primary/50">
+								<span
+									className="loading loading-md loading-dots"
+									aria-label="Waiting for response"
+								/>
+							</div>
+						</div>
 					)}
 				</div>
 				<div ref={bottomRef} />
@@ -88,8 +149,14 @@ export default function ChatPage() {
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 					onKeyDown={handleKeyDown}
+					disabled={isSending}
 				/>
-				<button className="btn btn-circle btn-primary" onClick={handleSend} aria-label="Send">
+				<button
+					className="btn btn-circle btn-primary"
+					onClick={handleSend}
+					aria-label="Send"
+					disabled={isSending}
+				>
 					{SendIcon()}
 				</button>
 			</div>
