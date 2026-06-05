@@ -8,6 +8,7 @@ interface Message {
 
 const CHAT_MESSAGES_STORAGE_KEY = 'uc-transfer-chatbot:messages';
 
+// TODO Chat Bot Name
 const INITIAL_MESSAGES: Message[] = [
 	{
 		role: 'bot',
@@ -101,10 +102,10 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-screen flex-col">
-			<header className="flex flex-row items-center justify-between border-b p-4">
+		<div className="flex h-dvh flex-col bg-[radial-gradient(ellipse_at_center,#0E0E0E_25%,#106070_200%)]">
+			<header className="flex flex-row items-center justify-between border-b pr-4">
 				<a href="/">
-					<img src="/favicon.png" className="h-14" alt="Logo of Developer's Guild" />
+					<img src="/favicon.png" className="h-20 p-2" alt="Logo of Developer's Guild" />
 				</a>
 				<button className="btn rounded-3xl btn-xl btn-primary" onClick={handleReset}>
 					Reset
