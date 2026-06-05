@@ -3,6 +3,8 @@ from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 import os
 from dotenv import load_dotenv
+from query_courses import search_articulations, get_valid_schools, get_valid_major, get_valid_receiving_courses, get_valid_cc_courses 
+
 
 load_dotenv()
 
@@ -19,6 +21,35 @@ agent = create_agent(
 )
 
 def get_ai_response(user_message: str):
+    message = message.lower()
+    to_school = None
+    major = None
+    receiving = None
+    cc_course = None
+
+    for school in get_valid_schools():
+        if school.lower() in message:
+            to_school = school
+            break
+    
+    for major in get_valid_major():
+        if major.lower() in message:
+            major = major
+            break
+    
+    for receiving in get_valid_receiving_courses():
+        if receiving.lower() in message:
+            receiving = receiving
+            break
+    
+    for course in get_valid_cc_courses():
+        if course.lower() in message:
+            cc_course = course
+            break
+
+              
+    rows = search_articulations(to_school=to_school, major=major, receiving=receiving, cc_course=cc_course)
+
     result = agent.invoke(
         {"messages": [
             {"role": "user", "content": user_message}
