@@ -21,7 +21,7 @@ agent = create_agent(
 )
 
 def get_ai_response(user_message: str):
-    message = message.lower()
+    message = user_message.lower()
     to_school = None
     major = None
     receiving = None
@@ -49,15 +49,24 @@ def get_ai_response(user_message: str):
 
               
     rows = search_articulations(to_school=to_school, major=major, receiving=receiving, cc_course=cc_course)
+    print(rows)
+if __name__ == "__main__":
 
-    result = agent.invoke(
+    response = get_ai_response(
+
+        "Does CIS 22A transfer to UC Berkeley for Computer Science?"
+
+    )
+
+    print(response)
+    """ result = agent.invoke(
         {"messages": [
             {"role": "user", "content": user_message}
         ]}
     )
 
     return result["messages"][-1].content_blocks[0]["text"]
-
+    """
     """
     # for now
 
