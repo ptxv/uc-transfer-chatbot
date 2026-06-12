@@ -1,6 +1,4 @@
 import json
-from langchain.agents import create_agent
-from langchain.chat_models import init_chat_model
 import os
 
 from dotenv import load_dotenv
@@ -18,7 +16,7 @@ load_dotenv()
 
 chat_model = init_chat_model(
     model="gpt-5-mini",
-    base_url="https://api.llm7.io/v1" if os.getenv("USE_LLM7").lower() == "true" else None,
+    base_url="https://api.llm7.io/v1" if os.getenv("USE_LLM7", "").lower() == "true" else None,
     api_key=os.getenv("AI_API_KEY"),
 )
 
@@ -107,81 +105,10 @@ def claim_boundary(to_school, major, rows):
     return "Rows were retrieved for the requested UC campus and major. You may answer from those rows only."
 
 
-def stream_ai_response(user_message: str):
-    stream = agent.stream_events(
-        {"messages": [
-            {"role": "user", "content": user_message}
-        ]},
-        version="v3"
-    )
-
-    for message in stream.messages:
-        for delta in message.text:
-            if delta:
-                yield delta
-
-def get_ai_response(user_message: str):
-    message = user_message.lower()
-    to_school = first_mentioned(get_valid_schools(), message)
-    major = first_mentioned(get_valid_major(), message)
-    cc_course = first_mentioned(get_valid_cc_courses(), message)
-    receiving = first_mentioned(get_valid_receiving_courses(), message, skip=cc_course)
-
-              
-    rows = search_articulations(to_school=to_school, major=major, receiving=receiving, cc_course=cc_course)
-    result = agent.invoke(
-        {"messages": [
-            {"role": "user", "content": user_message}
-        ]}
-    )
-    response = result["messages"][-1]
-
-    if isinstance(response.content, str):
-        return response.content
-
-    return response.content_blocks[0]["text"]
-if __name__ == "__main__":
-    if not any([to_school, major, receiving, cc_course]):
-        return "I need a UC campus, major, UC course, or community college course to search the articulation data."
-
-    rows = search_articulations(
-        to_school=to_school,
-        major=major,
-        receiving=receiving,
-        cc_course=cc_course,
-        limit=500
-    )
-    summary = {
-        "row_count": len(rows),
-        "campuses": sorted({row[0] for row in rows if row[0]}),
-        "majors": sorted({row[1] for row in rows if row[1]})[:20]
-    }
-
-    response = chat_model.invoke([
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {
-            "role": "user",
-            "content": "\n\n".join([
-                f"Student question: {user_message}",
-                "Claim boundary:",
-                claim_boundary(to_school, major, rows),
-                "Matched filters:",
-                json.dumps({
-                    "to_school": to_school,
-                    "major": major,
-                    "receiving": receiving,
-                    "cc_course": cc_course
-                }, indent=2),
-                "Retrieved row summary:",
-                json.dumps(summary, indent=2),
-                "Retrieved articulation rows:",
-                json.dumps(articulation_rows(rows[:25]), indent=2)
-            ])
-        }
-    ])
-
-    return response.content
 def get_ai_response(messages):
+    if isinstance(messages, str):
+        messages = [{"role": "user", "content": messages}]
+
     filters = {
         "to_school": None,
         "major": None,
@@ -201,101 +128,62 @@ def get_ai_response(messages):
 
         content = message["content"].lower()
 
-        for name, values in filter_values.items():
-            if filters[name] is None:
-                filters[name] = first_matching_value(values, content)
+        if filters["to_school"] is None:
+            filters["to_school"] = first_mentioned(filter_values["to_school"], content)
+        if filters["major"] is None:
+            filters["major"] = first_mentioned(filter_values["major"], content)
+        if filters["cc_course"] is None:
+            filters["cc_course"] = first_mentioned(filter_values["cc_course"], content)
+        if filters["receiving"] is None:
+            filters["receiving"] = first_mentioned(
+                filter_values["receiving"],
+                content,
+                skip=filters["cc_course"]
+            )
 
         if all(filters.values()):
             break
 
-    print(response)
-    """ result = agent.invoke(
-        {"messages": [
-            {"role": "user", "content": user_message}
-        ]}
-    )
+    if not any(filters.values()):
+        return "I need a UC campus, major, UC course, or community college course to search the articulation data."
 
-    return result["messages"][-1].content_blocks[0]["text"]
-    """
-    """
-    # for now
-
-    conn = sqlite3.connect("transfer.db")
-    cursor = conn.cursor()
-
-    cursor.execute(\"\"\"
-        SELECT answer FROM transfer_info
-        WHERE ? LIKE '%' || question_keyword || '%'
-        LIMIT 1
-    \"\"\", (user_message.lower(),))
-
-    result = cursor.fetchone()
-    conn.close()
-
-    if result:
-        return result[0]
-
-    return "I do not have information about that yet."
-    """
-    rows = []
-    if any(filters.values()):
-        rows = search_articulations(**filters, limit=20)
-
-    model_messages = messages
-    if rows:
-        model_messages = messages[:-1] + [{
+    rows = search_articulations(**filters, limit=500)
+    summary = {
+        "row_count": len(rows),
+        "campuses": sorted({row[0] for row in rows if row[0]}),
+        "majors": sorted({row[1] for row in rows if row[1]})[:20]
+    }
+    latest_message = messages[-1]["content"]
+    model_messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        *messages[:-1],
+        {
             "role": "user",
-            "content": f"{messages[-1]['content']}\n\nRelevant articulation rows:\n{format_articulation_rows(rows)}"
-        }]
+            "content": "\n\n".join([
+                f"Student question: {latest_message}",
+                "Claim boundary:",
+                claim_boundary(filters["to_school"], filters["major"], rows),
+                "Matched filters:",
+                json.dumps(filters, indent=2),
+                "Retrieved row summary:",
+                json.dumps(summary, indent=2),
+                "Retrieved articulation rows:",
+                json.dumps(articulation_rows(rows[:25]), indent=2)
+            ])
+        }
+    ]
 
-    result = agent.invoke({"messages": model_messages})
-    reply = result["messages"][-1]
+    response = chat_model.invoke(model_messages)
 
-    if isinstance(reply.content, str):
-        return reply.content
+    return response_text(response)
 
-    return reply.content_blocks[0]["text"]
 
-def first_matching_value(values, content):
-    for value in values:
-        if value and value.lower() in content:
-            return value
+def stream_ai_response(user_message: str):
+    yield get_ai_response(user_message)
 
-    return None
 
-def format_articulation_rows(rows):
-    lines = []
+def response_text(response):
+    if isinstance(response.content, str):
+        return response.content
 
-    for row in rows:
-        (
-            to_school,
-            major,
-            academic_year,
-            receiving_type,
-            receiving_courses_text,
-            uc_prefix,
-            uc_course_number,
-            uc_course_title,
-            cc_prefix,
-            cc_course_number,
-            cc_course_title,
-            group_position,
-            course_position,
-            group_conjunction,
-            course_conjunction,
-            requirement_instruction,
-            requirement_category,
-            section_title,
-            notes
-        ) = row
-
-        uc_course = " ".join(part for part in [uc_prefix, uc_course_number] if part)
-        cc_course = " ".join(part for part in [cc_prefix, cc_course_number] if part)
-        receiving_label = receiving_courses_text or uc_course or uc_course_title
-        cc_label = " - ".join(part for part in [cc_course, cc_course_title] if part)
-
-        lines.append(
-            f"- {to_school}, {major}, {academic_year}: {receiving_label} -> {cc_label}"
-        )
-
-    return "\n".join(lines)
+    return response.content_blocks[0]["text"]
