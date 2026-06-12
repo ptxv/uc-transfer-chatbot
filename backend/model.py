@@ -14,11 +14,7 @@ from query_courses import (
 
 load_dotenv()
 
-chat_model = init_chat_model(
-    model="gpt-5-mini",
-    base_url="https://api.llm7.io/v1" if os.getenv("USE_LLM7", "").lower() == "true" else None,
-    api_key=os.getenv("AI_API_KEY"),
-)
+chat_model = None
 
 SYSTEM_PROMPT = """
 You are a UC transfer advising assistant.
@@ -105,6 +101,19 @@ def claim_boundary(to_school, major, rows):
     return "Rows were retrieved for the requested UC campus and major. You may answer from those rows only."
 
 
+def get_chat_model():
+    global chat_model
+
+    if chat_model is None:
+        chat_model = init_chat_model(
+            model="gpt-5-mini",
+            base_url="https://api.llm7.io/v1" if os.getenv("USE_LLM7", "").lower() == "true" else None,
+            api_key=os.getenv("AI_API_KEY"),
+        )
+
+    return chat_model
+
+
 def get_ai_response(messages):
     if isinstance(messages, str):
         messages = [{"role": "user", "content": messages}]
@@ -144,8 +153,32 @@ def get_ai_response(messages):
         if all(filters.values()):
             break
 
+    latest_message = messages[-1]["content"]
+
     if not any(filters.values()):
-        return "I need a UC campus, major, UC course, or community college course to search the articulation data."
+        campuses = sorted(get_valid_schools())
+        majors = sorted(get_valid_major())[:20]
+        model_messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            *messages[:-1],
+            {
+                "role": "user",
+                "content": "\n\n".join([
+                    f"Student question: {latest_message}",
+                    "Claim boundary:",
+                    "No specific articulation rows were retrieved because no UC campus, major, UC course, or community college course was detected. You may answer only from the local data summary below. If the student asks a broad question, summarize what local data is available and ask for a more specific campus, major, or course when needed.",
+                    "Local data summary:",
+                    json.dumps({
+                        "campuses": campuses,
+                        "sample_majors": majors
+                    }, indent=2)
+                ])
+            }
+        ]
+
+        response = get_chat_model().invoke(model_messages)
+
+        return response_text(response)
 
     rows = search_articulations(**filters, limit=500)
     summary = {
@@ -153,7 +186,6 @@ def get_ai_response(messages):
         "campuses": sorted({row[0] for row in rows if row[0]}),
         "majors": sorted({row[1] for row in rows if row[1]})[:20]
     }
-    latest_message = messages[-1]["content"]
     model_messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         *messages[:-1],
@@ -173,7 +205,7 @@ def get_ai_response(messages):
         }
     ]
 
-    response = chat_model.invoke(model_messages)
+    response = get_chat_model().invoke(model_messages)
 
     return response_text(response)
 
