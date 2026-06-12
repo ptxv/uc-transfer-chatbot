@@ -1,34 +1,224 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Syne:wght@400..800&display=swap');
-
 @import 'tailwindcss';
 
 @theme {
-	--font-instrument-sans: 'Instrument Sans', var(--font-sans);
-	--font-roboto: Roboto, var(--font-sans);
-	--font-syne: Syne, var(--font-sans);
+	--font-sans:
+		Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 @plugin 'daisyui' {
-	themes: dark;
+	themes: light;
 }
 
 @plugin 'daisyui/theme' {
-	name: 'dark';
+	name: 'light';
 	default: true;
-	--color-primary: #5bddff;
-	--color-primary-content: #000000;
+	--color-primary: #0b2f5f;
+	--color-primary-content: #ffffff;
 }
 
-button {
-	@apply touch-manipulation font-instrument-sans;
+:root {
+	color: #101828;
+	background: #f7f8fb;
+	font-family:
+		Inter,
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		'Segoe UI',
+		sans-serif;
+}
+
+body {
+	min-width: 320px;
+	margin: 0;
+	background: #f7f8fb;
+}
+
+button,
+a,
+input {
+	@apply touch-manipulation;
+}
+
+button,
+a {
+	-webkit-tap-highlight-color: transparent;
 }
 
 input {
 	@apply text-base;
 }
 
+button:focus-visible,
+a:focus-visible {
+	outline: 2px solid #0b2f5f;
+	outline-offset: 3px;
+}
+
+input:focus-visible {
+	outline: none;
+}
+
+.assistant-message p + p {
+	margin-top: 0.75rem;
+}
+
+.app-shell-enter {
+	animation: page-fade-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.sidebar-enter {
+	animation: sidebar-fade-in 680ms cubic-bezier(0.22, 1, 0.36, 1) 80ms both;
+}
+
+.main-panel-enter {
+	animation: panel-fade-in 620ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.hero-enter {
+	animation: hero-fade-in 760ms cubic-bezier(0.22, 1, 0.36, 1) 180ms both;
+}
+
+.composer-enter {
+	animation: composer-fade-in 680ms cubic-bezier(0.22, 1, 0.36, 1) 220ms both;
+}
+
+.brand-card {
+	background: rgba(255, 255, 255, 0.72);
+	border-color: rgba(227, 232, 240, 0.88);
+	box-shadow: 0 14px 38px rgba(16, 24, 40, 0.045);
+	transition:
+		border-color 180ms ease,
+		box-shadow 180ms ease,
+		transform 180ms ease;
+}
+
+.brand-card:hover {
+	border-color: #d8e0ec;
+	box-shadow: 0 18px 46px rgba(16, 24, 40, 0.065);
+	transform: translateY(-1px);
+}
+
+.sidebar-link-tab {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	border: 1px solid #dfe7f2;
+	border-radius: 1rem;
+	background: #ffffff;
+	padding: 0.7rem 0.85rem;
+	color: #0b2f5f;
+	font-size: 0.82rem;
+	font-weight: 650;
+	line-height: 1;
+	box-shadow: 0 8px 22px rgba(16, 24, 40, 0.045);
+	transition:
+		background 160ms ease,
+		border-color 160ms ease,
+		box-shadow 160ms ease,
+		color 160ms ease,
+		transform 160ms ease;
+}
+
+.sidebar-link-tab:hover {
+	background: #f8fbff;
+	border-color: #bfd0e7;
+	box-shadow: 0 12px 28px rgba(16, 24, 40, 0.065);
+	color: #08264d;
+	transform: translateY(-1px);
+}
+
+.sidebar-link-tab span:last-child {
+	transition: transform 160ms ease;
+}
+
+.sidebar-link-tab:hover span:last-child {
+	transform: translateX(2px);
+}
+
+.sidebar-link-tab-small {
+	padding: 0.6rem 0.78rem;
+	color: #344054;
+	font-size: 0.78rem;
+	box-shadow: 0 6px 18px rgba(16, 24, 40, 0.035);
+}
+
+.message-enter {
+	animation: message-enter 160ms ease-out;
+}
+
 .streaming-bubble {
 	animation: streaming-bubble-in 180ms ease-out;
+}
+
+@keyframes message-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes page-fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes sidebar-fade-in {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes panel-fade-in {
+	from {
+		opacity: 0;
+	}
+
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes hero-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes composer-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes streaming-bubble-in {
@@ -40,5 +230,16 @@ input {
 	to {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	::before,
+	::after {
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
 	}
 }
