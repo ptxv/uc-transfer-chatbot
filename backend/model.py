@@ -107,6 +107,19 @@ def claim_boundary(to_school, major, rows):
     return "Rows were retrieved for the requested UC campus and major. You may answer from those rows only."
 
 
+def stream_ai_response(user_message: str):
+    stream = agent.stream_events(
+        {"messages": [
+            {"role": "user", "content": user_message}
+        ]},
+        version="v3"
+    )
+
+    for message in stream.messages:
+        for delta in message.text:
+            if delta:
+                yield delta
+
 def get_ai_response(user_message: str):
     message = user_message.lower()
     to_school = first_mentioned(get_valid_schools(), message)
@@ -181,6 +194,35 @@ def get_ai_response(messages):
         if all(filters.values()):
             break
 
+    print(response)
+    """ result = agent.invoke(
+        {"messages": [
+            {"role": "user", "content": user_message}
+        ]}
+    )
+
+    return result["messages"][-1].content_blocks[0]["text"]
+    """
+    """
+    # for now
+
+    conn = sqlite3.connect("transfer.db")
+    cursor = conn.cursor()
+
+    cursor.execute(\"\"\"
+        SELECT answer FROM transfer_info
+        WHERE ? LIKE '%' || question_keyword || '%'
+        LIMIT 1
+    \"\"\", (user_message.lower(),))
+
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        return result[0]
+
+    return "I do not have information about that yet."
+    """
     rows = []
     if any(filters.values()):
         rows = search_articulations(**filters, limit=20)
