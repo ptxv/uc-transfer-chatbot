@@ -127,6 +127,20 @@ def get_ai_response(user_message: str):
     cc_course = first_mentioned(get_valid_cc_courses(), message)
     receiving = first_mentioned(get_valid_receiving_courses(), message, skip=cc_course)
 
+              
+    rows = search_articulations(to_school=to_school, major=major, receiving=receiving, cc_course=cc_course)
+    result = agent.invoke(
+        {"messages": [
+            {"role": "user", "content": user_message}
+        ]}
+    )
+    response = result["messages"][-1]
+
+    if isinstance(response.content, str):
+        return response.content
+
+    return response.content_blocks[0]["text"]
+if __name__ == "__main__":
     if not any([to_school, major, receiving, cc_course]):
         return "I need a UC campus, major, UC course, or community college course to search the articulation data."
 
