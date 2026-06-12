@@ -4,6 +4,9 @@ from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 from model import get_ai_response
 from database import setup_database
+from flask import Flask, Response, jsonify, request, stream_with_context
+from flask_cors import CORS
+from model import get_ai_response
 from query_courses import search_articulations
 
 app = Flask(__name__)
@@ -11,9 +14,11 @@ CORS(app)
 
 setup_database()
 
+
 @app.route("/")
 def index():
     return "Backend is running!"
+
 
 @app.route("/search", methods=["GET"])
 def search():
@@ -25,11 +30,7 @@ def search():
         limit = request.args.get("limit", default=50, type=int)
 
         rows = search_articulations(
-            to_school=to_school,
-            major=major,
-            receiving=receiving,
-            cc_course=cc_course,
-            limit=limit
+            to_school=to_school, major=major, receiving=receiving, cc_course=cc_course, limit=limit
         )
 
         results = []
@@ -54,38 +55,36 @@ def search():
                 requirement_instruction,
                 requirement_category,
                 section_title,
-                notes
+                notes,
             ) = row
 
-            results.append({
-                "to_school": to_school,
-                "major": major,
-                "academic_year": academic_year,
-                "receiving_type": receiving_type,
-                "receiving_courses_text": receiving_courses_text,
-                "uc_course": f"{uc_prefix} {uc_course_number}".strip(),
-                "uc_course_title": uc_course_title,
-                "cc_course": f"{cc_prefix} {cc_course_number}".strip(),
-                "cc_course_title": cc_course_title,
-                "group_position": group_position,
-                "course_position": course_position,
-                "group_conjunction": group_conjunction,
-                "course_conjunction": course_conjunction,
-                "requirement_instruction": requirement_instruction,
-                "requirement_category": requirement_category,
-                "section_title": section_title,
-                "notes": notes
-            })
+            results.append(
+                {
+                    "to_school": to_school,
+                    "major": major,
+                    "academic_year": academic_year,
+                    "receiving_type": receiving_type,
+                    "receiving_courses_text": receiving_courses_text,
+                    "uc_course": f"{uc_prefix} {uc_course_number}".strip(),
+                    "uc_course_title": uc_course_title,
+                    "cc_course": f"{cc_prefix} {cc_course_number}".strip(),
+                    "cc_course_title": cc_course_title,
+                    "group_position": group_position,
+                    "course_position": course_position,
+                    "group_conjunction": group_conjunction,
+                    "course_conjunction": course_conjunction,
+                    "requirement_instruction": requirement_instruction,
+                    "requirement_category": requirement_category,
+                    "section_title": section_title,
+                    "notes": notes,
+                }
+            )
 
-        return jsonify({
-            "count": len(results),
-            "results": results
-        })
+        return jsonify({"count": len(results), "results": results})
 
     except Exception as e:
-        return jsonify({
-            "error": str(e)
-        }), 500
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -117,6 +116,7 @@ def chat():
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
     )
 
+
 def chat_messages_from_request(data):
     raw_messages = data.get("messages")
     messages = []
@@ -146,6 +146,7 @@ def chat_messages_from_request(data):
         return [{"role": "user", "content": message.strip()}]
 
     return []
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

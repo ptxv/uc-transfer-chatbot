@@ -4,13 +4,12 @@ import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from query_courses import (
-    search_articulations,
-    get_valid_schools,
+    get_valid_cc_courses,
     get_valid_major,
     get_valid_receiving_courses,
-    get_valid_cc_courses
+    get_valid_schools,
+    search_articulations,
 )
-
 
 load_dotenv()
 
@@ -51,23 +50,25 @@ def articulation_rows(rows):
             requirement_instruction,
             requirement_category,
             section_title,
-            notes
+            notes,
         ) = row
 
-        prompt_rows.append({
-            "to_school": to_school,
-            "major": major,
-            "academic_year": academic_year,
-            "receiving_type": receiving_type,
-            "receiving_courses_text": receiving_courses_text,
-            "uc_course": f"{uc_prefix} {uc_course_number}".strip(),
-            "uc_course_title": uc_course_title,
-            "cc_course": f"{cc_prefix} {cc_course_number}".strip(),
-            "cc_course_title": cc_course_title,
-            "requirement_category": requirement_category,
-            "section_title": section_title,
-            "notes": notes
-        })
+        prompt_rows.append(
+            {
+                "to_school": to_school,
+                "major": major,
+                "academic_year": academic_year,
+                "receiving_type": receiving_type,
+                "receiving_courses_text": receiving_courses_text,
+                "uc_course": f"{uc_prefix} {uc_course_number}".strip(),
+                "uc_course_title": uc_course_title,
+                "cc_course": f"{cc_prefix} {cc_course_number}".strip(),
+                "cc_course_title": cc_course_title,
+                "requirement_category": requirement_category,
+                "section_title": section_title,
+                "notes": notes,
+            }
+        )
 
     return prompt_rows
 
@@ -107,7 +108,9 @@ def get_chat_model():
     if chat_model is None:
         chat_model = init_chat_model(
             model="gpt-5-mini",
-            base_url="https://api.llm7.io/v1" if os.getenv("USE_LLM7", "").lower() == "true" else None,
+            base_url="https://api.llm7.io/v1"
+            if os.getenv("USE_LLM7", "").lower() == "true"
+            else None,
             api_key=os.getenv("AI_API_KEY"),
         )
 
@@ -145,9 +148,7 @@ def get_ai_response(messages):
             filters["cc_course"] = first_mentioned(filter_values["cc_course"], content)
         if filters["receiving"] is None:
             filters["receiving"] = first_mentioned(
-                filter_values["receiving"],
-                content,
-                skip=filters["cc_course"]
+                filter_values["receiving"], content, skip=filters["cc_course"]
             )
 
         if all(filters.values()):
@@ -163,17 +164,16 @@ def get_ai_response(messages):
             *messages[:-1],
             {
                 "role": "user",
-                "content": "\n\n".join([
-                    f"Student question: {latest_message}",
-                    "Claim boundary:",
-                    "No specific articulation rows were retrieved because no UC campus, major, UC course, or community college course was detected. You may answer only from the local data summary below. If the student asks a broad question, summarize what local data is available and ask for a more specific campus, major, or course when needed.",
-                    "Local data summary:",
-                    json.dumps({
-                        "campuses": campuses,
-                        "sample_majors": majors
-                    }, indent=2)
-                ])
-            }
+                "content": "\n\n".join(
+                    [
+                        f"Student question: {latest_message}",
+                        "Claim boundary:",
+                        "No specific articulation rows were retrieved because no UC campus, major, UC course, or community college course was detected. You may answer only from the local data summary below. If the student asks a broad question, summarize what local data is available and ask for a more specific campus, major, or course when needed.",
+                        "Local data summary:",
+                        json.dumps({"campuses": campuses, "sample_majors": majors}, indent=2),
+                    ]
+                ),
+            },
         ]
 
         response = get_chat_model().invoke(model_messages)
@@ -184,25 +184,27 @@ def get_ai_response(messages):
     summary = {
         "row_count": len(rows),
         "campuses": sorted({row[0] for row in rows if row[0]}),
-        "majors": sorted({row[1] for row in rows if row[1]})[:20]
+        "majors": sorted({row[1] for row in rows if row[1]})[:20],
     }
     model_messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         *messages[:-1],
         {
             "role": "user",
-            "content": "\n\n".join([
-                f"Student question: {latest_message}",
-                "Claim boundary:",
-                claim_boundary(filters["to_school"], filters["major"], rows),
-                "Matched filters:",
-                json.dumps(filters, indent=2),
-                "Retrieved row summary:",
-                json.dumps(summary, indent=2),
-                "Retrieved articulation rows:",
-                json.dumps(articulation_rows(rows[:25]), indent=2)
-            ])
-        }
+            "content": "\n\n".join(
+                [
+                    f"Student question: {latest_message}",
+                    "Claim boundary:",
+                    claim_boundary(filters["to_school"], filters["major"], rows),
+                    "Matched filters:",
+                    json.dumps(filters, indent=2),
+                    "Retrieved row summary:",
+                    json.dumps(summary, indent=2),
+                    "Retrieved articulation rows:",
+                    json.dumps(articulation_rows(rows[:25]), indent=2),
+                ]
+            ),
+        },
     ]
 
     response = get_chat_model().invoke(model_messages)
