@@ -2,7 +2,7 @@ import json
 
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
-from model import stream_ai_response
+from model import get_ai_response
 from database import setup_database
 from query_courses import search_articulations
 
@@ -89,19 +89,6 @@ def search():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
-    user_message = data["message"]
-
-    def format_sse(event, payload):
-        return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
-
-    def generate():
-        yield format_sse("message_start", {})
-
-        for chunk in stream_ai_response(user_message):
-            yield format_sse("text_delta", {"text": chunk})
-
-        yield format_sse("message_end", {})
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({"error": "Expected JSON object"}), 400
@@ -110,7 +97,13 @@ def chat():
     if not messages or messages[-1]["role"] != "user":
         return jsonify({"error": "Expected latest user message"}), 400
 
-    ai_reply = get_ai_response(messages)
+    def format_sse(event, payload):
+        return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
+
+    def generate():
+        yield format_sse("message_start", {})
+        yield format_sse("text_delta", {"text": get_ai_response(messages)})
+        yield format_sse("message_end", {})
 
     return Response(
         stream_with_context(generate()),
